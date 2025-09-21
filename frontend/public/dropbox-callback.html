@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dropbox Authentication</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f5f5f5;
+        }
+        .container {
+            text-align: center;
+            padding: 2rem;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            max-width: 400px;
+        }
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #007ee5;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .error {
+            color: #e74c3c;
+            background-color: #fdf2f2;
+            padding: 1rem;
+            border-radius: 4px;
+            margin: 1rem 0;
+        }
+        .success {
+            color: #27ae60;
+            background-color: #f0f9f0;
+            padding: 1rem;
+            border-radius: 4px;
+            margin: 1rem 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="loading">
+            <div class="spinner"></div>
+            <h2>Authenticating with Dropbox...</h2>
+            <p>Please wait while we complete the authentication process.</p>
+        </div>
+        
+        <div id="success" style="display: none;">
+            <h2 style="color: #27ae60;">✓ Authentication Successful!</h2>
+            <p>You can now close this window and return to the application.</p>
+        </div>
+        
+        <div id="error" style="display: none;">
+            <h2 style="color: #e74c3c;">✗ Authentication Failed</h2>
+            <p id="error-message"></p>
+            <button onclick="window.close()">Close Window</button>
+        </div>
+    </div>
+
+    <script>
+        async function handleOAuthCallback() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const code = urlParams.get('code');
+            const error = urlParams.get('error');
+            
+            if (error) {
+                showError(`Authentication failed: ${error}`);
+                return;
+            }
+            
+            if (!code) {
+                showError('No authorization code received from Dropbox');
+                return;
+            }
+            
+            try {
+                // Exchange code for access token
+                const response = await fetch('/api/dropbox/token', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        code: code,
+                        redirect_uri: window.location.origin + '/dropbox-callback.html'
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok && result.success) {
+                    // Store the access token in localStorage
+                    localStorage.setItem('dropbox_access_token', result.access_token);
+                    showSuccess();
+                    
+                    // Close the window after a short delay
+                    setTimeout(() => {
+                        window.close();
+                    }, 2000);
+                } else {
+                    showError(result.error || 'Failed to exchange code for token');
+                }
+            } catch (error) {
+                console.error('Token exchange error:', error);
+                showError('Network error during authentication');
+            }
+        }
+        
+        function showError(message) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('error').style.display = 'block';
+            document.getElementById('error-message').textContent = message;
+        }
+        
+        function showSuccess() {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('success').style.display = 'block';
+        }
+        
+        // Handle the OAuth callback when the page loads
+        window.addEventListener('load', handleOAuthCallback);
+    </script>
+</body>
+</html>

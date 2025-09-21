@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Campaign Endpoints Test</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        .test-section {
+            margin: 20px;
+            padding: 20px;
+            border: 1px solid #e1e5e9;
+            border-radius: 6px;
+            background: #fafbfc;
+        }
+        .test-section h3 {
+            margin-top: 0;
+            color: #24292e;
+            border-bottom: 1px solid #e1e5e9;
+            padding-bottom: 10px;
+        }
+        .button-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 15px 0;
+        }
+        button {
+            padding: 10px 16px;
+            border: 1px solid #d1d5da;
+            border-radius: 6px;
+            background: #fafbfc;
+            color: #24292e;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        button:hover {
+            background: #f3f4f6;
+            border-color: #c6cbd1;
+        }
+        button.primary {
+            background: #2ea043;
+            color: white;
+            border-color: #2ea043;
+        }
+        button.primary:hover {
+            background: #2c974b;
+        }
+        button.danger {
+            background: #d73a49;
+            color: white;
+            border-color: #d73a49;
+        }
+        button.danger:hover {
+            background: #cb2431;
+        }
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .status {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+        .status.connected {
+            background: #d4edda;
+            color: #155724;
+        }
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .status.loading {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+        .results {
+            margin-top: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #e1e5e9;
+            border-radius: 6px;
+            background: white;
+        }
+        .log-entry {
+            padding: 12px;
+            border-bottom: 1px solid #f6f8fa;
+            font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+        .log-entry:last-child {
+            border-bottom: none;
+        }
+        .log-entry.success {
+            background: #f0fff4;
+            border-left: 3px solid #28a745;
+        }
+        .log-entry.error {
+            background: #fff5f5;
+            border-left: 3px solid #dc3545;
+        }
+        .log-entry.info {
+            background: #f8f9fa;
+            border-left: 3px solid #007bff;
+        }
+        .timestamp {
+            color: #6a737d;
+            font-size: 11px;
+        }
+        .json-response {
+            background: #f6f8fa;
+            border: 1px solid #e1e5e9;
+            border-radius: 3px;
+            padding: 10px;
+            margin: 8px 0;
+            font-family: 'SF Mono', Monaco, monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+            overflow-x: auto;
+        }
+        .config-section {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .config-section h4 {
+            margin-top: 0;
+            color: #856404;
+        }
+        input {
+            padding: 8px 12px;
+            border: 1px solid #d1d5da;
+            border-radius: 4px;
+            font-size: 14px;
+            width: 200px;
+        }
+        .clear-btn {
+            float: right;
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 Campaign Endpoints Test Suite</h1>
+            <p>Test your backend API endpoints and IndexedDB connectivity</p>
+            <div id="connection-status">
+                <span class="status loading">Checking connection...</span>
+            </div>
+        </div>
+
+        <div class="config-section">
+            <h4>⚙️ Configuration</h4>
+            <label>Backend URL: 
+                <input type="text" id="backend-url" value="http://localhost:5002" placeholder="http://localhost:5002">
+            </label>
+            <button onclick="testConnection()" class="primary">Test Connection</button>
+        </div>
+
+        <div class="test-section">
+            <h3>🔗 Connection Tests</h3>
+            <div class="button-group">
+                <button onclick="testConnection()" class="primary">Test Backend Connection</button>
+                <button onclick="testCORS()">Test CORS</button>
+                <button onclick="testIndexedDB()">Test IndexedDB</button>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>📝 Campaign CRUD Operations</h3>
+            <div class="button-group">
+                <button onclick="createTestCampaign()" class="primary">Create Campaign</button>
+                <button onclick="listCampaigns()">List All Campaigns</button>
+                <button onclick="getCampaignById()">Get Campaign by ID</button>
+                <button onclick="updateCampaign()">Update Campaign</button>
+                <button onclick="deleteCampaign()" class="danger">Delete Campaign</button>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🔍 Advanced Features</h3>
+            <div class="button-group">
+                <button onclick="searchCampaigns()">Search Campaigns</button>
+                <button onclick="filterByStatus()">Filter by Status</button>
+                <button onclick="testBulkOperations()">Bulk Operations</button>
+                <button onclick="testErrorHandling()">Test Error Handling</button>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>💾 IndexedDB Operations</h3>
+            <div class="button-group">
+                <button onclick="testIndexedDBCRUD()">Test IndexedDB CRUD</button>
+                <button onclick="testIndexedDBSearch()">Test IndexedDB Search</button>
+                <button onclick="clearIndexedDB()" class="danger">Clear IndexedDB</button>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>📊 Results</h3>
+            <button onclick="clearResults()" class="clear-btn">Clear Results</button>
+            <div id="results" class="results"></div>
+        </div>
+    </div>
+
+    <script>
+        let backendUrl = 'http://localhost:5002';
+        let currentCampaignId = null;
+        let testCampaignIds = [];
+
+        // Utility Functions
+        function getBackendUrl() {
+            backendUrl = document.getElementById('backend-url').value || 'http://localhost:5002';
+            return backendUrl;
+        }
+
+        function log(message, type = 'info', data = null) {
+            const results = document.getElementById('results');
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            
+            const timestamp = new Date().toLocaleTimeString();
+            let content = `<span class="timestamp">[${timestamp}]</span> ${message}`;
+            
+            if (data) {
+                content += `<div class="json-response">${JSON.stringify(data, null, 2)}</div>`;
+            }
+            
+            entry.innerHTML = content;
+            results.appendChild(entry);
+            results.scrollTop = results.scrollHeight;
+            
+            console.log(`[${timestamp}] ${message}`, data || '');
+        }
+
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+        }
+
+        function updateConnectionStatus(status, message) {
+            const statusEl = document.getElementById('connection-status');
+            statusEl.innerHTML = `<span class="status ${status}">${message}</span>`;
+        }
+
+        // Connection Tests
+        async function testConnection() {
+            const url = getBackendUrl();
+            try {
+                updateConnectionStatus('loading', 'Testing connection...');
+                const response = await fetch(`${url}/health`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    updateConnectionStatus('connected', `✅ Connected to ${url}`);
+                    log('✅ Backend connection successful', 'success', data);
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+            } catch (error) {
+                updateConnectionStatus('error', `❌ Connection failed`);
+                log(`❌ Backend connection failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function testCORS() {
+            const url = getBackendUrl();
+            try {
+                const response = await fetch(`${url}/api/campaigns`, {
+                    method: 'OPTIONS',
+                    headers: {
+                        'Origin': window.location.origin,
+                        'Access-Control-Request-Method': 'GET',
+                        'Access-Control-Request-Headers': 'Content-Type'
+                    }
+                });
+                
+                log('✅ CORS preflight successful', 'success', {
+                    status: response.status,
+                    headers: Object.fromEntries([...response.headers.entries()])
+                });
+            } catch (error) {
+                log(`❌ CORS test failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function testIndexedDB() {
+            try {
+                if (!window.indexedDB) {
+                    throw new Error('IndexedDB not supported');
+                }
+
+                const request = indexedDB.open('CampaignDB', 2);
+                
+                request.onupgradeneeded = (event) => {
+                    const db = event.target.result;
+                    if (!db.objectStoreNames.contains('campaigns')) {
+                        const store = db.createObjectStore('campaigns', { keyPath: 'id' });
+                        store.createIndex('createdAt', 'createdAt', { unique: false });
+                        store.createIndex('status', 'status', { unique: false });
+                    }
+                };
+
+                await new Promise((resolve, reject) => {
+                    request.onsuccess = () => resolve(request.result);
+                    request.onerror = () => reject(request.error);
+                });
+
+                log('✅ IndexedDB connection successful', 'success');
+            } catch (error) {
+                log(`❌ IndexedDB test failed: ${error.message}`, 'error');
+            }
+        }
+
+        // Campaign CRUD Operations
+        async function createTestCampaign() {
+            const url = getBackendUrl();
+            const campaignData = {
+                brief: {
+                    id: `test-${Date.now()}`,
+                    name: `Test Campaign ${new Date().toLocaleTimeString()}`,
+                    products: [
+                        {
+                            id: 'prod-1',
+                            name: 'Test Product 1',
+                            description: 'A test product for API testing',
+                            category: 'electronics'
+                        },
+                        {
+                            id: 'prod-2',
+                            name: 'Test Product 2',
+                            description: 'Another test product',
+                            category: 'fashion'
+                        }
+                    ],
+                    targetRegion: 'north-america',
+                    targetAudience: 'Tech-savvy millennials',
+                    campaignMessage: 'Experience the future of testing',
+                    brandColors: ['#007AFF', '#34C759'],
+                    localization: {
+                        primaryLanguage: 'en',
+                        additionalLanguages: ['es']
+                    }
+                },
+                assets: [],
+                status: 'draft'
+            };
+
+            try {
+                const response = await fetch(`${url}/api/campaigns`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(campaignData)
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    currentCampaignId = data.campaign.id;
+                    testCampaignIds.push(currentCampaignId);
+                    log(`✅ Campaign created successfully with ID: ${currentCampaignId}`, 'success', data.campaign);
+                } else {
+                    throw new Error(data.error || `HTTP ${response.status}`);
+                }
+            } catch (error) {
+                log(`❌ Create campaign failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function listCampaigns() {
+            const url = getBackendUrl();
+            try {
+                const response = await fetch(`${url}/api/campaigns`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    log(`✅ Found ${data.count} campaigns`, 'success', data.campaigns);
+                } else {
+                    throw new Error(data.error || `HTTP ${response.status}`);
+                }
+            } catch (error) {
+                log(`❌ List campaigns failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function getCampaignById() {
+            if (!currentCampaignId) {
+                log('❌ No campaign ID available. Create a campaign first.', 'error');
+                return;
+            }
+
+            const url = getBackendUrl();
+            try {
+                const response = await fetch(`${url}/api/campaigns/${currentCampaignId}`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    log(`✅ Retrieved campaign: ${data.campaign.brief.name}`, 'success', data.campaign);
+                } else {
+                    throw new Error(data.error || `HTTP ${response.status}`);
+                }
+            } catch (error) {
+                log(`❌ Get campaign failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function updateCampaign() {
+            if (!currentCampaignId) {
+                log('❌ No campaign ID available. Create a campaign first.', 'error');
+                return;
+            }
+
+            const url = getBackendUrl();
+            const updateData = {
+                status: 'generated',
+                brief: {
+                    campaignMessage: 'Updated campaign message for testing'
+                }
+            };
+
+            try {
+                const response = await fetch(`${url}/api/campaigns/${currentCampaignId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(updateData)
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    log(`✅ Campaign updated successfully`, 'success', data.campaign);
+                } else {
+                    throw new Error(data.error || `HTTP ${response.status}`);
+                }
+            } catch (error) {
+                log(`❌ Update campaign failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function deleteCampaign() {
+            if (!currentCampaignId) {
+                log('❌ No campaign ID available. Create a campaign first.', 'error');
+                return;
+            }
+
+            const url = getBackendUrl();
+            try {
+                const response = await fetch(`${url}/api/campaigns/${currentCampaignId}`, {
+                    method: 'DELETE'
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    log(`✅ Campaign deleted successfully: ${currentCampaignId}`, 'success');
+                    testCampaignIds = testCampaignIds.filter(id => id !== currentCampaignId);
+                    currentCampaignId = testCampaignIds[testCampaignIds.length - 1] || null;
+                } else {
+                    throw new Error(data.error || `HTTP ${response.status}`);
+                }
+            } catch (error) {
+                log(`❌ Delete campaign failed: ${error.message}`, 'error');
+            }
+        }
+
+        // Advanced Features
+        async function searchCampaigns() {
+            const url = getBackendUrl();
+            const searchQuery = 'Test';
+            
+            try {
+                const response = await fetch(`${url}/api/campaigns?search=${encodeURIComponent(searchQuery)}`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    log(`✅ Search results for "${searchQuery}": ${data.count} campaigns`, 'success', data.campaigns);
+                } else {
+                    throw new Error(data.error || `HTTP ${response.status}`);
+                }
+            } catch (error) {
+                log(`❌ Search campaigns failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function filterByStatus() {
+            const url = getBackendUrl();
+            const status = 'draft';
+            
+            try {
+                const response = await fetch(`${url}/api/campaigns?status=${status}`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    log(`✅ Campaigns with status "${status}": ${data.count} found`, 'success', data.campaigns);
+                } else {
+                    throw new Error(data.error || `HTTP ${response.status}`);
+                }
+            } catch (error) {
+                log(`❌ Filter campaigns failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function testBulkOperations() {
+            log('🚀 Starting bulk operations test...', 'info');
+            
+            // Create multiple campaigns
+            for (let i = 1; i <= 3; i++) {
+                await createTestCampaign();
+                await new Promise(resolve => setTimeout(resolve, 100)); // Small delay
+            }
+            
+            // List all campaigns
+            await listCampaigns();
+            
+            log('✅ Bulk operations test completed', 'success');
+        }
+
+        async function testErrorHandling() {
+            const url = getBackendUrl();
+            
+            // Test invalid campaign creation
+            try {
+                const response = await fetch(`${url}/api/campaigns`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ invalid: 'data' })
+                });
+
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    log(`✅ Error handling working: ${data.error}`, 'success');
+                } else {
+                    log(`❌ Error handling failed: Expected error but got success`, 'error');
+                }
+            } catch (error) {
+                log(`✅ Network error handling: ${error.message}`, 'success');
+            }
+
+            // Test non-existent campaign
+            try {
+                const response = await fetch(`${url}/api/campaigns/non-existent-id`);
+                const data = await response.json();
+                
+                if (!response.ok && response.status === 404) {
+                    log(`✅ 404 handling working: ${data.error}`, 'success');
+                } else {
+                    log(`❌ 404 handling failed`, 'error');
+                }
+            } catch (error) {
+                log(`❌ 404 test failed: ${error.message}`, 'error');
+            }
+        }
+
+        // IndexedDB Operations
+        async function testIndexedDBCRUD() {
+            try {
+                const db = await new Promise((resolve, reject) => {
+                    const request = indexedDB.open('CampaignDB', 2);
+                    request.onsuccess = () => resolve(request.result);
+                    request.onerror = () => reject(request.error);
+                });
+
+                const campaign = {
+                    id: `indexeddb-test-${Date.now()}`,
+                    brief: {
+                        name: 'IndexedDB Test Campaign',
+                        products: [{ id: '1', name: 'Test Product', description: 'Test', category: 'test' }],
+                        targetRegion: 'test',
+                        targetAudience: 'test',
+                        campaignMessage: 'test',
+                        brandColors: ['#000'],
+                        localization: { primaryLanguage: 'en', additionalLanguages: [] }
+                    },
+                    assets: [],
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString(),
+                    status: 'draft',
+                    stats: { totalAssets: 0, averageCompliance: 0, legalIssues: 0 }
+                };
+
+                // Create
+                await new Promise((resolve, reject) => {
+                    const transaction = db.transaction(['campaigns'], 'readwrite');
+                    const store = transaction.objectStore('campaigns');
+                    const request = store.add(campaign);
+                    request.onsuccess = () => resolve();
+                    request.onerror = () => reject(request.error);
+                });
+
+                // Read
+                const retrieved = await new Promise((resolve, reject) => {
+                    const transaction = db.transaction(['campaigns'], 'readonly');
+                    const store = transaction.objectStore('campaigns');
+                    const request = store.get(campaign.id);
+                    request.onsuccess = () => resolve(request.result);
+                    request.onerror = () => reject(request.error);
+                });
+
+                // Delete
+                await new Promise((resolve, reject) => {
+                    const transaction = db.transaction(['campaigns'], 'readwrite');
+                    const store = transaction.objectStore('campaigns');
+                    const request = store.delete(campaign.id);
+                    request.onsuccess = () => resolve();
+                    request.onerror = () => reject(request.error);
+                });
+
+                log('✅ IndexedDB CRUD operations successful', 'success', { created: campaign.id, retrieved: !!retrieved });
+            } catch (error) {
+                log(`❌ IndexedDB CRUD failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function testIndexedDBSearch() {
+            try {
+                const db = await new Promise((resolve, reject) => {
+                    const request = indexedDB.open('CampaignDB', 2);
+                    request.onsuccess = () => resolve(request.result);
+                    request.onerror = () => reject(request.error);
+                });
+
+                const campaigns = await new Promise((resolve, reject) => {
+                    const transaction = db.transaction(['campaigns'], 'readonly');
+                    const store = transaction.objectStore('campaigns');
+                    const request = store.getAll();
+                    request.onsuccess = () => resolve(request.result);
+                    request.onerror = () => reject(request.error);
+                });
+
+                log(`✅ IndexedDB search successful: Found ${campaigns.length} campaigns`, 'success', campaigns);
+            } catch (error) {
+                log(`❌ IndexedDB search failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function clearIndexedDB() {
+            try {
+                const db = await new Promise((resolve, reject) => {
+                    const request = indexedDB.open('CampaignDB', 2);
+                    request.onsuccess = () => resolve(request.result);
+                    request.onerror = () => reject(request.error);
+                });
+
+                await new Promise((resolve, reject) => {
+                    const transaction = db.transaction(['campaigns'], 'readwrite');
+                    const store = transaction.objectStore('campaigns');
+                    const request = store.clear();
+                    request.onsuccess = () => resolve();
+                    request.onerror = () => reject(request.error);
+                });
+
+                log('✅ IndexedDB cleared successfully', 'success');
+            } catch (error) {
+                log(`❌ Clear IndexedDB failed: ${error.message}`, 'error');
+            }
+        }
+
+        // Auto-run connection test on load
+        window.addEventListener('load', () => {
+            setTimeout(testConnection, 500);
+        });
+
+        // Update backend URL when input changes
+        document.getElementById('backend-url').addEventListener('change', function() {
+            backendUrl = this.value;
+            testConnection();
+        });
+    </script>
+</body>
+</html>

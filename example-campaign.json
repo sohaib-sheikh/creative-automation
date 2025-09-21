@@ -1,0 +1,23 @@
+{
+  "name": "Summer Sale Campaign",
+  "products": [
+    {
+      "name": "Premium Headphones",
+      "description": "High-quality wireless headphones with noise cancellation",
+      "category": "Electronics"
+    },
+    {
+      "name": "Smart Watch",
+      "description": "Fitness tracking smartwatch with heart rate monitor",
+      "category": "Wearables"
+    }
+  ],
+  "targetRegion": "North America",
+  "targetAudience": "Tech-savvy consumers aged 25-45",
+  "campaignMessage": "Get ready for summer with our latest tech innovations! Save up to 30% on premium electronics.",
+  "brandColors": ["#FF6B35", "#004E89", "#FFFFFF"],
+  "localization": {
+    "primaryLanguage": "en",
+    "additionalLanguages": ["es", "fr"]
+  }
+}
