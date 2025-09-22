@@ -111,14 +111,17 @@ If you prefer to start services individually:
 
 2. **Configure App Settings:**
    - In your app settings, go to the "Permissions" tab
+   - Go to the "Settings" tab and add redirect URIs:
+     - `http://localhost:3000/dropbox-callback.html` (for development)
+     - `https://yourdomain.com/dropbox-callback.html` (for production)
    - Enable the following scopes:
      - `files.metadata.write` - Create and modify files
      - `files.metadata.read` - Read file metadata
      - `files.content.write` - Upload files
      - `files.content.read` - Download files
-   - Go to the "OAuth 2" tab and add redirect URIs:
-     - `http://localhost:3000/dropbox-callback.html` (for development)
-     - `https://yourdomain.com/dropbox-callback.html` (for production)
+     - `sharing.write` - Create and manage shared links
+     - `sharing.read` - Read shared links and folder information
+     - Under "Connect" section, enable: `openid` - OpenID Connect authentication
 
 3. **Get Your Credentials:**
    - Copy your "App key" (this is your `DROPBOX_CLIENT_ID`)
