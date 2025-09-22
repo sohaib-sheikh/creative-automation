@@ -100,6 +100,20 @@ If you prefer to start services individually:
 
 ### API Setup Instructions
 
+#### Google Gemini API Setup
+
+**Google GenAI (Required for image generation):**
+- Go to [Google AI Studio](https://aistudio.google.com/)
+- Create a new API key
+- Add it as `GOOGLE_AI_API_KEY` in your `.env` file
+
+#### OpenAI API Setup
+
+**OpenAI (Required for message generation and image analysis):**
+- Go to [OpenAI Platform](https://platform.openai.com/)
+- Create a new API key
+- Add it as `OPENAI_KEY` in your `.env` file
+
 #### Dropbox API Setup
 
 1. **Create a Dropbox App:**
@@ -155,18 +169,6 @@ If you prefer to start services individually:
    - Create a campaign with image generation
    - The system will automatically use PhotoRoom to create multiple aspect ratios
    - Check the generated assets to see the expanded versions
-
-#### Optional API Services
-
-**Google GenAI (Required for image generation):**
-- Go to [Google AI Studio](https://aistudio.google.com/)
-- Create a new API key
-- Add it as `GOOGLE_AI_API_KEY` in your `.env` file
-
-**OpenAI (Required for message generation):**
-- Go to [OpenAI Platform](https://platform.openai.com/)
-- Create a new API key
-- Add it as `OPENAI_KEY` in your `.env` file
 
 ## Example Input and Output
 
