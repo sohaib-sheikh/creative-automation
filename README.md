@@ -117,8 +117,8 @@ If you prefer to start services individually:
      - `files.content.write` - Upload files
      - `files.content.read` - Download files
    - Go to the "OAuth 2" tab and add redirect URIs:
-     - `http://localhost:3000/dropbox-callback` (for development)
-     - `https://yourdomain.com/dropbox-callback` (for production)
+     - `http://localhost:3000/dropbox-callback.html` (for development)
+     - `https://yourdomain.com/dropbox-callback.html` (for production)
 
 3. **Get Your Credentials:**
    - Copy your "App key" (this is your `DROPBOX_CLIENT_ID`)
